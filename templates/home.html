@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<!--Home form lists the books in the DB-->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Book Alchemy Library</title>
+  </head>
+  <body>
+
+    <h1>Book Alchemy Library</h1>
+    <div style="margin-bottom: 20px;">
+        <a href="/" style="margin-right: 10px;"><button>Home</button></a>
+        <a href="/add_author" style="margin-right: 10px;"><button>➕ Add Author</button></a>
+        <a href="/add_book"><button>➕ Add Book</button></a>
+    </div>
+
+
+    <!-- Flash-Messages -->
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <ul>
+          {% for msg in messages %}
+            <li style="color: green;">{{ msg }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+
+    <!-- Search form -->
+    <form method="GET" action="/">
+      <input type="text" name="q" placeholder="Search books..." value="{{ request.args.get('q', '') }}">
+      <button type="submit">Search</button>
+    </form>
+
+
+    <!-- Drop down for search method (author or title) -->
+    <form method="GET" action="/" style="margin-top: 10px;">
+      <label for="sort">Sort by:</label>
+      <select name="sort" id="sort" onchange="this.form.submit()">
+        <option value="title" {% if request.args.get('sort') == 'title' %}selected{% endif %}>Title</option>
+        <option value="author" {% if request.args.get('sort') == 'author' %}selected{% endif %}>Author</option>
+      </select>
+      {% if request.args.get('q') %}
+        <input type="hidden" name="q" value="{{ request.args.get('q') }}">
+      {% endif %}
+    </form>
+
+    <hr>
+
+
+<!-- book list as 2x3 Grid -->
+<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
+  {% for book in books %}
+    <div style="border: 1px solid #ccc; padding: 10px;">
+      <h3><a href="/book/{{ book.id }}">{{ book.title }}</a></h3>
+      <p><strong>Author:</strong> {{ book.author.name }}</p>
+      <p><strong>Published:</strong> {{ book.publication_year }}</p>
+
+      {% if book.isbn %}
+        <img src="https://covers.openlibrary.org/b/isbn/{{ book.isbn }}-M.jpg" alt="Cover for {{ book.title }}">
+      {% else %}
+        <p><em>No cover available</em></p>
+      {% endif %}
+
+      <!-- Delete-Button deletes the book, without deleting the author-->
+      <form action="/book/{{ book.id }}/delete" method="POST" style="margin-top: 10px;">
+        <button type="submit" onclick="return confirm('Delete this book?')">Delete Book</button>
+      </form>
+    </div>
+  {% endfor %}
+</div>
+
+
+    <!-- Message if book or author is not in the DB -->
+    {% if message %}
+      <p style="color: red;">{{ message }}</p>
+    {% endif %}
+
+  <!-- Paging if more then 6 Books in the DB -->
+<div style="margin-top: 20px;">
+  {% if pagination.has_prev %}
+    <a href="{{ url_for('home', page=pagination.prev_num, sort=request.args.get('sort'), q=request.args.get('q')) }}">
+      <button>⬅ Prev</button>
+    </a>
+  {% endif %}
+
+  <span>Page {{ pagination.page }} of {{ pagination.pages }}</span>
+
+  {% if pagination.has_next %}
+    <a href="{{ url_for('home', page=pagination.next_num, sort=request.args.get('sort'), q=request.args.get('q')) }}">
+      <button>Next ➡</button>
+    </a>
+  {% endif %}
+</div>
+
+
+  </body>
+</html>
+
+
+
+
+
+
