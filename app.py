@@ -18,6 +18,10 @@ db.init_app(app)
 # Displays the home page with a searchable, sortable, paginated book list
 
 def home():
+    """
+    Render the homepage with a paginated list of books, supporting search and sorting.
+    """
+
     sort_by = request.args.get("sort", "title")
     query = request.args.get("q", "").strip()
     page = request.args.get("page", 1, type=int)
@@ -48,10 +52,14 @@ def home():
 # Shows a form to add a new author with name and optional birth/death dates.
 @app.route("/add_author", methods=["GET", "POST"])
 def add_author():
+    """
+    Handle author creation via form input; requires a name and optionally birth/death dates.
+    """
+
     message = ""
     if request.method == "POST":
         name = request.form.get("name")
-        birth_date = request.form.get("birth_date")
+        birth_date = request.form.get("birthdate")
         date_of_death = request.form.get("date_of_death")
 
         if name:
@@ -67,6 +75,10 @@ def add_author():
 # Shows a form to add a new book with title, ISBN, year, and author selection.
 @app.route("/add_book", methods=["GET", "POST"])
 def add_book():
+    """
+    Handle book creation via form input; requires ISBN, title, and author selection.
+    """
+
     message = ""
     authors = Author.query.order_by(Author.name).all()
 
@@ -94,6 +106,10 @@ def add_book():
 @app.route("/book/<int:book_id>/delete", methods=["POST"])
 # Deletes a specific book after confirmation
 def delete_book(book_id):
+    """
+    Delete a book by its ID and redirect to the homepage.
+    """
+
     book = Book.query.get_or_404(book_id)
 
     # Buch löschen
